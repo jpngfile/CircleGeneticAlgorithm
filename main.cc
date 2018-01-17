@@ -9,7 +9,7 @@ int main() {
 
     std::vector<sf::CircleShape> circles;
     for (int i = 0; i < 15; i++){
-        sf::CircleShape shape(10.f);
+        sf::CircleShape shape((rand() & 50) + 5);
         shape.setFillColor(sf::Color::Green);
         shape.setPosition(rand() % 500, rand() % 500);
         circles.push_back(shape);
