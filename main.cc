@@ -6,15 +6,18 @@
 #include <iostream>
 #include <math.h>
 
+#include <chrono>
+#include <thread>
+
 std::bitset<29> generateSeed(){
     int xcoord = rand() % 500;
     int ycoord = rand() % 500;
-    int radius = rand() % 250;
+    int radius = rand() % 100;
     int seed = (xcoord << 19) + (ycoord << 9) + radius;
     auto set = std::bitset<29>(seed);
-    std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
-    std::cout << set.to_string() << std::endl;
-    std::cout << set.to_ulong() << std::endl;
+    //std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
+    //std::cout << set.to_string() << std::endl;
+    //std::cout << set.to_ulong() << std::endl;
     return set;
 }
 
@@ -26,7 +29,7 @@ sf::CircleShape getCircleFromSeed(std::bitset<29> seed){
     int xcoord = circleNum >> 19;
     sf::CircleShape circle(radius);
     circle.setPosition(xcoord, ycoord);
-    std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
+    //std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
     return circle;
 }
 
@@ -34,8 +37,6 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(500, 500), "SFML works!");
     srand(time(NULL));
 
-    auto seed = generateSeed();
-    auto circ = getCircleFromSeed(seed);
 
     std::vector<sf::CircleShape> circles;
     for (int i = 0; i < 15; i++){
@@ -45,7 +46,13 @@ int main() {
         circles.push_back(shape);
     }
 
-/*
+    for (int i = 0; i < 10; i++){
+        auto seed = generateSeed();
+        auto circle = getCircleFromSeed(seed);
+        circle.setFillColor(sf::Color::Blue);
+        circles.push_back(circle);
+    }
+
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
@@ -58,7 +65,7 @@ int main() {
             window.draw(shape);
         }
         window.display();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-*/
     return 0;
 }
