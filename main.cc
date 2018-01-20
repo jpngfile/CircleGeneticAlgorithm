@@ -89,6 +89,18 @@ void crossoverSeeds(std::bitset<29>& seedA, std::bitset<29>& seedB){
     }
 }
 
+// Assumed that sum is the sum of the list
+int getRouletteSelection(std::vector<int> list, int sum){
+    int index = rand() % sum;
+    for (int i = 0; i < list.size(); i++){
+        index -= list[i];
+        if (index <= 0){
+            return i;
+        }
+    }
+    return 0;
+}
+
 std::ostream & operator<<(std::ostream & out, std::bitset<29> set){
     return out << set.to_string();
 }
@@ -128,6 +140,13 @@ int main() {
     auto fitnessVector = getFitness(seedCircles, circles);
     for (int fit : fitnessVector){
         std::cout << fit << " ";
+    }
+    int sumFitness = accumulate(fitnessVector.begin(), fitnessVector.end(), 0);
+    std::cout << std::endl;
+    std::cout << sumFitness << std::endl;
+    for (int i = 0; i < 15; i++){
+        int selection = getRouletteSelection(fitnessVector, sumFitness);
+        std::cout << selection << " ";
     }
     std::cout << std::endl;
 
