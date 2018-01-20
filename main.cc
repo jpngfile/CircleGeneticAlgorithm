@@ -19,10 +19,14 @@ const double CROSSOVER_RATE = 0.7;
 
 //const double MUTATION_RATE = 1;
 //const double CROSSOVER_RATE = 1;
+//
+double dist(int x1, int y1, int x2, int y2){
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
 
 std::bitset<29> generateSeed(){
-    int xcoord = rand() % 500;
-    int ycoord = rand() % 500;
+    int xcoord = rand() % 400;
+    int ycoord = rand() % 400;
     int radius = rand() % 100;
     int seed = (xcoord << 19) + (ycoord << 9) + radius;
     auto set = std::bitset<29>(seed);
@@ -54,6 +58,23 @@ void mutateSeed(std::bitset<29>& seed){
     //std::cout << "end mutation" << std::endl;
 }
 
+std::vector<int> getFitness(std::vector<sf::CircleShape> seeds, std::vector<sf::CircleShape> circles){
+    std::vector<int> fitnesses;
+    for (auto seed : seeds){
+        auto seedPos = seed.getPosition();
+        for (auto circle : circles){
+            auto circlePos = circle.getPosition();
+            if (dist(seedPos.x, seedPos.y, circlePos.x, circlePos.y) < seed.getRadius() + circle.getRadius()){
+                fitnesses.push_back(1);
+                goto nextSeed;
+            }
+        }
+        fitnesses.push_back(seed.getRadius());
+nextSeed:;
+    }
+    return fitnesses;
+}
+
 void crossoverSeeds(std::bitset<29>& seedA, std::bitset<29>& seedB){
     if (rand() < RAND_MAX * CROSSOVER_RATE){
         int index = rand() % 29;
@@ -73,42 +94,61 @@ std::ostream & operator<<(std::ostream & out, std::bitset<29> set){
 }
 
 int main() {
-    //sf::RenderWindow window(sf::VideoMode(500, 500), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(500, 500), "SFML works!");
     srand(time(NULL));
 
     std::vector<sf::CircleShape> circles;
-    for (int i = 0; i < 15; i++){
-        sf::CircleShape shape((rand() & 50) + 5);
+    for (int i = 0; i < 10; i++){
+        int radius = (rand() & 50) + 5;
+        sf::CircleShape shape(radius);
         shape.setFillColor(sf::Color::Green);
-        shape.setPosition(rand() % 500, rand() % 500);
+        shape.setPosition(rand() % 400, rand() % 400);
+        //shape.setPosition(0, 0);
+        shape.setOrigin(radius, radius);
         circles.push_back(shape);
     }
 
+    std::vector<std::bitset<29>> seeds;
     for (int i = 0; i < 10; i++){
         auto seed = generateSeed();
-        auto circle = getCircleFromSeed(seed);
-        circle.setFillColor(sf::Color::Blue);
-        circles.push_back(circle);
+        seeds.push_back(seed);
+        //auto circle = getCircleFromSeed(seed);
+        //circle.setFillColor(sf::Color::Blue);
+        //circles.push_back(circle);
     }
     
-    std::cout << "Seeds: " << std::endl;
-    std::vector<std::bitset<29>> seeds;
-    for (int i = 0; i < 2; i++){
-        auto seed = generateSeed();
-        std::cout << seed << std::endl;
-        seeds.push_back(seed);
+    std::vector<sf::CircleShape> seedCircles;
+    std::transform(seeds.begin(), seeds.end(), std::back_inserter(seedCircles), getCircleFromSeed);
+
+    for (auto &circle : seedCircles){
+        circle.setFillColor(sf::Color::Blue);
+        circle.setOrigin(circle.getRadius(), circle.getRadius());
     }
-    std::cout << "Mutations: " << std::endl;
-    for (auto & seed : seeds){
-        mutateSeed(seed);
-        std::cout << seed << std::endl;
+
+    auto fitnessVector = getFitness(seedCircles, circles);
+    for (int fit : fitnessVector){
+        std::cout << fit << " ";
     }
-    std::cout << "Crossover: " << std::endl;
-    crossoverSeeds(seeds[0], seeds[1]);
-    for (auto seed : seeds){
-        std::cout << seed << std::endl;
-    }
-/*
+    std::cout << std::endl;
+
+    //std::cout << "Seeds: " << std::endl;
+    //std::vector<std::bitset<29>> seeds;
+    //for (int i = 0; i < 2; i++){
+    //    auto seed = generateSeed();
+    //    std::cout << seed << std::endl;
+    //    seeds.push_back(seed);
+    //}
+    //std::cout << "Mutations: " << std::endl;
+    //for (auto & seed : seeds){
+    //    mutateSeed(seed);
+    //    std::cout << seed << std::endl;
+    //}
+    //std::cout << "Crossover: " << std::endl;
+    //crossoverSeeds(seeds[0], seeds[1]);
+    //for (auto seed : seeds){
+    //    std::cout << seed << std::endl;
+    //}
+
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
@@ -117,12 +157,14 @@ int main() {
         }
 
         window.clear();
+        for (auto shape : seedCircles){
+            window.draw(shape);
+        }
         for (sf::CircleShape shape : circles){
             window.draw(shape);
         }
         window.display();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-    */
     return 0;
 }
