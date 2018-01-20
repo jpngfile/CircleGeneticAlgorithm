@@ -98,7 +98,7 @@ int main() {
     srand(time(NULL));
 
     std::vector<sf::CircleShape> circles;
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 15; i++){
         int radius = (rand() & 50) + 5;
         sf::CircleShape shape(radius);
         shape.setFillColor(sf::Color::Green);
@@ -148,7 +148,6 @@ int main() {
     //for (auto seed : seeds){
     //    std::cout << seed << std::endl;
     //}
-
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
@@ -157,8 +156,11 @@ int main() {
         }
 
         window.clear();
-        for (auto shape : seedCircles){
-            window.draw(shape);
+        for (int i = 0; i < seedCircles.size(); i++){
+            if (fitnessVector[i] > 1){
+                sf::CircleShape shape = seedCircles[i];
+                window.draw(shape);
+            }
         }
         for (sf::CircleShape shape : circles){
             window.draw(shape);
