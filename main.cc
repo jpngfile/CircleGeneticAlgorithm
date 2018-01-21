@@ -39,9 +39,9 @@ std::bitset<29> generateSeed(){
 sf::CircleShape getCircleFromSeed(std::bitset<29> seed){
     int circleNum = (int) seed.to_ulong();
     //std::cout << circleNum << std::endl;
-    int radius = (circleNum << 23) >> 23;
-    int ycoord = (circleNum << 13) >> 22;
-    int xcoord = circleNum >> 19;
+    int radius = ((circleNum << 23) >> 23) % 100;
+    int ycoord = ((circleNum << 13) >> 22) % 400;
+    int xcoord = (circleNum >> 19) % 400;
     sf::CircleShape circle(radius);
     circle.setPosition(xcoord, ycoord);
     //std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
@@ -101,6 +101,23 @@ int getRouletteSelection(std::vector<int> list, int sum){
     return 0;
 }
 
+std::vector<std::bitset<29>> createNewGeneration(std::vector<std::bitset<29>> generation, std::vector<int> fitnesses){
+    int sumFitness = accumulate(fitnesses.begin(), fitnesses.end(), 0);
+    std::vector<std::bitset<29>> newGeneration;
+    for (int i = 0; i < generation.size(); i+= 2){
+        int indexA = getRouletteSelection(fitnesses, sumFitness);
+        int indexB = getRouletteSelection(fitnesses, sumFitness);
+        auto seedA = generation[indexA];
+        auto seedB = generation[indexB];
+        crossoverSeeds(seedA, seedB);
+        mutateSeed(seedA);
+        mutateSeed(seedB);
+        newGeneration.push_back(seedA);
+        newGeneration.push_back(seedB);
+    }
+    return newGeneration;
+}
+
 std::ostream & operator<<(std::ostream & out, std::bitset<29> set){
     return out << set.to_string();
 }
@@ -149,6 +166,16 @@ int main() {
         std::cout << selection << " ";
     }
     std::cout << std::endl;
+
+    auto newGeneration = createNewGeneration(seeds, fitnessVector);
+    std::cout << "old generation" << std::endl;
+    for (auto seed : seeds){
+        std::cout << seed << std::endl;
+    }
+    std::cout << "new generation" << std::endl;
+    for (auto seed : newGeneration){
+        std::cout << seed << std::endl;
+    }
 
     //std::cout << "Seeds: " << std::endl;
     //std::vector<std::bitset<29>> seeds;
