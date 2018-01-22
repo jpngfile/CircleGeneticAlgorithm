@@ -18,6 +18,7 @@ const double MUTATION_RATE = 0.001;
 const double CROSSOVER_RATE = 0.7;
 const int GENERATION_SIZE = 500;
 const int WINDOW_SIZE = 500;
+const int MAX_RADIUS = 250;
 //const double MUTATION_RATE = 1;
 //const double CROSSOVER_RATE = 1;
 //
@@ -28,7 +29,7 @@ double dist(int x1, int y1, int x2, int y2){
 std::bitset<29> generateSeed(){
     int xcoord = rand() % WINDOW_SIZE;
     int ycoord = rand() % WINDOW_SIZE;
-    int radius = rand() % 200;
+    int radius = rand() % MAX_RADIUS;
     int seed = (xcoord << 19) + (ycoord << 9) + radius;
     auto set = std::bitset<29>(seed);
     //std::cout << "(" << xcoord << ", " << ycoord << ") " << radius << std::endl;
@@ -40,7 +41,7 @@ std::bitset<29> generateSeed(){
 sf::CircleShape getCircleFromSeed(std::bitset<29> seed){
     int circleNum = (int) seed.to_ulong();
     //std::cout << circleNum << std::endl;
-    int radius = ((circleNum << 23) >> 23) % 200;
+    int radius = ((circleNum << 23) >> 23) % MAX_RADIUS;
     int ycoord = ((circleNum << 13) >> 22) % WINDOW_SIZE;
     int xcoord = (circleNum >> 19) % WINDOW_SIZE;
     sf::CircleShape circle(radius);
@@ -198,6 +199,7 @@ int main() {
     //
     int numGenerations = 20;
     int generationCounter = 0;
+    sf::CircleShape currentMax(0);
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
@@ -215,6 +217,7 @@ int main() {
         for (sf::CircleShape shape : circles){
             window.draw(shape);
         }
+        window.draw(currentMax);
         window.display();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -224,7 +227,12 @@ int main() {
 
         fitnessVector = getFitness(seedCircles, circles);
         auto max = std::max_element(fitnessVector.begin(), fitnessVector.end());
-        std::cout << generationCounter++ << " " << *max << std::endl;
+        if (currentMax.getRadius() < *max){
+            int maxIndex = distance(fitnessVector.begin(), max);
+            currentMax = seedCircles[maxIndex];
+            currentMax.setFillColor(sf::Color::Red);
+        }
+        std::cout << generationCounter++ << " " << *max << " " << currentMax.getRadius() << std::endl;
     }
     return 0;
 }
