@@ -13,8 +13,10 @@
  * Seeds are 29 bits long
  */
 
+// Weird bug where circles start to disappear, and are displayed in random spots
+
 // Constants
-const double MUTATION_RATE = 0.001;
+const double MUTATION_RATE = 0.003;
 const double CROSSOVER_RATE = 0.7;
 const int GENERATION_SIZE = 500;
 const int WINDOW_SIZE = 500;
@@ -41,9 +43,9 @@ std::bitset<29> generateSeed(){
 sf::CircleShape getCircleFromSeed(std::bitset<29> seed){
     int circleNum = (int) seed.to_ulong();
     //std::cout << circleNum << std::endl;
-    int radius = ((circleNum << 23) >> 23) % MAX_RADIUS;
-    int ycoord = ((circleNum << 13) >> 22) % WINDOW_SIZE;
-    int xcoord = (circleNum >> 19) % WINDOW_SIZE;
+    int radius = abs((circleNum << 23) >> 23) % MAX_RADIUS;
+    int ycoord = abs((circleNum << 13) >> 22) % WINDOW_SIZE;
+    int xcoord = abs(circleNum >> 19) % WINDOW_SIZE;
     sf::CircleShape circle(radius);
     circle.setPosition(xcoord, ycoord);
     circle.setFillColor(sf::Color::Blue);
@@ -232,7 +234,8 @@ int main() {
             currentMax = seedCircles[maxIndex];
             currentMax.setFillColor(sf::Color::Red);
         }
-        std::cout << generationCounter++ << " " << *max << " " << currentMax.getRadius() << std::endl;
+        //std::cout << generationCounter++ << " " << *max << " " << currentMax.getRadius() << std::endl;
+        std::cout << generationCounter++ << " (" << currentMax.getPosition().x << ", " << currentMax.getPosition().y << ") " << currentMax.getRadius() << std::endl;
     }
     return 0;
 }
