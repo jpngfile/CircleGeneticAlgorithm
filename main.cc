@@ -47,7 +47,8 @@ sf::CircleShape getCircleFromSeed(std::bitset<29> seed){
 
 void mutateSeed(std::bitset<29>& seed){
     for (int i = 0; i < seed.size(); i++){
-        if (rand() < RAND_MAX * MUTATION_RATE){
+        double mutationRate = i < 9 ? MUTATION_RATE*3 : MUTATION_RATE;
+        if (rand() < RAND_MAX * mutationRate){
             seed.flip(i);
         }
     }
