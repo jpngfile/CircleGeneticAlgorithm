@@ -118,7 +118,8 @@ std::ostream & operator<<(std::ostream & out, std::bitset<29> set){
 int main() {
     
     // Initialize window and random func
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE, WINDOW_SIZE), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE, WINDOW_SIZE), "Circle Genetic Algorithm");
+    window.setPosition(sf::Vector2i(50, 50));
     srand(time(NULL));
 
     // Create obstacle circles
@@ -150,7 +151,7 @@ int main() {
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed or sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
                 window.close();
         }
 
